@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Juego Flores 🌼</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(to bottom, #5cadff, #cceeff);
+      font-family: 'Press Start 2P', cursive;
+    }
+
+    .game-box {
+      width: 95vw;
+      max-width: 480px;
+      height: 80vh;
+      max-height: 600px;
+      background: #a3e0ff;
+      border: 8px solid #222;
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 25px rgba(0,0,0,0.7);
+    }
+
+    .panel {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      right: 5px;
+      display: flex;
+      justify-content: space-between;
+      background: rgba(255,255,255,0.9);
+      border: 3px solid #222;
+      padding: 8px;
+      font-size: 4vw;
+      border-radius: 6px;
+      z-index: 10;
+    }
+
+    .item {
+      position: absolute;
+      font-size: 8vw;
+      cursor: pointer;
+      filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.4));
+      transition: transform 0.1s;
+    }
+    .item:active { transform: scale(1.2); }
+
+    @keyframes fall {
+      from { top: -10%; }
+      to { top: 90%; }
+    }
+
+    .ground {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 10%;
+      background: linear-gradient(to top, #2a8a3a, #3cba54);
+      border-top: 4px solid #222;
+    }
+
+    .tree {
+      position: absolute;
+      bottom: 10%;
+      left: 10%;
+      width: 10%;
+      height: 25%;
+      background: #8B4513;
+      border: 3px solid #222;
+    }
+    .tree::after {
+      content: "";
+      position: absolute;
+      top: -70%;
+      left: -80%;
+      width: 250%;
+      height: 100%;
+      background: #2a8a3a;
+      border: 3px solid #1a5a26;
+      border-radius: 20%;
+    }
+
+    .message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      border: 6px solid #222;
+      padding: 5%;
+      text-align: center;
+      display: none;
+      font-size: 4vw;
+      border-radius: 8px;
+      box-shadow: 6px 6px #000;
+      z-index: 20;
+    }
+
+    .btn-restart {
+      margin-top: 15px;
+      padding: 10px 12px;
+      background: #ffcc00;
+      border: 3px solid #333;
+      cursor: pointer;
+      font-size: 3.5vw;
+      box-shadow: 3px 3px #000;
+    }
+
+    .peace-symbol {
+      font-size: 10vw;
+      display: block;
+      margin-top: 10px;
+      animation: spin 4s linear infinite;
+    }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="game-box" id="gameBox">
+    <div class="panel">
+      <div id="score">🌼 0/10</div>
+      <div id="errors">❌ 0/3</div>
+    </div>
+    <div class="ground"></div>
+    <div class="tree"></div>
+    <div class="message" id="messageBox">
+      <div id="finalMessage"></div>
+      <div class="peace-symbol">☮️</div>
+      <button class="btn-restart" onclick="restartGame()">🔄 Reiniciar</button>
+    </div>
+  </div>
+
+  <audio id="soundCatch" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+  <audio id="soundError" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+
+  <script>
+    const gameBox = document.getElementById("gameBox");
+    const scoreEl = document.getElementById("score");
+    const errorsEl = document.getElementById("errors");
+    const messageBox = document.getElementById("messageBox");
+    const finalMessage = document.getElementById("finalMessage");
+
+    const soundCatch = document.getElementById("soundCatch");
+    const soundError = document.getElementById("soundError");
+
+    let score = 0;
+    let errors = 0;
+    const maxFlowers = 10;
+    const maxErrors = 3;
+    let gameInterval;
+    let gameOver = false;
+
+    function createItem() {
+      if (gameOver) return;
+      const item = document.createElement("div");
+      item.classList.add("item");
+
+      const rand = Math.random();
+      if (rand < 0.6) { item.textContent = "🌼"; item.dataset.type = "flower"; }
+      else if (rand < 0.8) { item.textContent = "🪨"; item.dataset.type = "rock"; }
+      else { item.textContent = "🍂"; item.dataset.type = "leaf"; }
+
+      item.style.left = Math.random() * (gameBox.offsetWidth - 50) + "px";
+      const duration = 3 + Math.random() * 2;
+      item.style.animation = `fall ${duration}s linear forwards`;
+
+      item.onclick = () => {
+        if (gameOver) return;
+        if (item.dataset.type === "flower") {
+          score++;
+          scoreEl.textContent = `🌼 ${score}/${maxFlowers}`;
+          soundCatch.currentTime = 0; soundCatch.play();
+          checkWin();
+        } else {
+          errors++;
+          errorsEl.textContent = `❌ ${errors}/${maxErrors}`;
+          soundError.currentTime = 0; soundError.play();
+          checkLose();
+        }
+        item.remove();
+      };
+
+      gameBox.appendChild(item);
+
+      setTimeout(() => {
+        if (gameBox.contains(item)) {
+          item.remove();
+          if (!gameOver && item.dataset.type === "flower") {
+            errors++;
+            errorsEl.textContent = `❌ ${errors}/${maxErrors}`;
+            soundError.currentTime = 0; soundError.play();
+            checkLose();
+          }
+        }
+      }, duration * 1000);
+    }
+
+    function startGame() {
+      score = 0; errors = 0; gameOver = false;
+      scoreEl.textContent = `🌼 0/${maxFlowers}`;
+      errorsEl.textContent = `❌ 0/${maxErrors}`;
+      messageBox.style.display = "none";
+      clearInterval(gameInterval);
+      gameInterval = setInterval(createItem, 1000);
+    }
+
+    function checkWin() {
+      if (score >= maxFlowers) {
+        endGame("🌼 ¡Lo lograste! Sumaste todas las flores.<br>✨ ¡Feliz inicio de primavera! ✨");
+      }
+    }
+
+    function checkLose() {
+      if (errors >= maxErrors) {
+        endGame("❌ No pasa nada, los obstáculos también enseñan.<br>🌼 ¡Feliz Día de la Amistad! 🌼");
+      }
+    }
+
+    function endGame(msg) {
+      gameOver = true;
+      clearInterval(gameInterval);
+      finalMessage.innerHTML = msg;
+      messageBox.style.display = "block";
+    }
+
+    function restartGame() {
+      document.querySelectorAll(".item").forEach(f => f.remove());
+      startGame();
+    }
+
+    startGame();
+  </script>
+</body>
+</html>
