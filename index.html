@@ -1,0 +1,114 @@
+<script>
+  const gameBox = document.getElementById("gameBox");
+  const scoreEl = document.getElementById("score");
+  const errorsEl = document.getElementById("errors");
+  const highScoreEl = document.getElementById("highScore");
+  const messageBox = document.getElementById("messageBox");
+  const finalMessage = document.getElementById("finalMessage");
+  const timerFill = document.getElementById("timerFill");
+
+  const soundCatch = document.getElementById("soundCatch");
+  const soundError = document.getElementById("soundError");
+  const bgMusic = document.getElementById("bgMusic");
+
+  let score = 0;
+  let errors = 0;
+  const maxErrors = 3;
+  let gameInterval;
+  let gameOver = false;
+  let timeLeft = 60;
+  let timerInterval;
+  let highScore = localStorage.getItem("highScore") || 0;
+  highScoreEl.textContent = "🏆 " + highScore;
+
+  function createItem() {
+    if (gameOver) return;
+    const item = document.createElement("div");
+    item.classList.add("item");
+    const rand = Math.random();
+    if (rand < 0.6) {
+      item.textContent = "🌼"; item.dataset.type = "flower";
+    } else if (rand < 0.8) {
+      item.textContent = "🪨"; item.dataset.type = "rock";
+    } else {
+      item.textContent = "🍂"; item.dataset.type = "leaf";
+    }
+    item.style.left = Math.random() * (gameBox.offsetWidth - 40) + "px";
+    const duration = 3 + Math.random() * 2;
+    item.style.animationDuration = duration + "s";
+    gameBox.appendChild(item);
+    setTimeout(() => { if (gameBox.contains(item)) item.remove(); }, duration*1000);
+  }
+
+  // 🔹 Ahora cualquier click en el área del juego recolecta la primera flor disponible
+  gameBox.addEventListener("click", () => {
+    if (gameOver) return;
+    const flower = document.querySelector(".item[data-type='flower']");
+    if (flower) {
+      score++;
+      scoreEl.textContent = "🌼 " + score;
+      soundCatch.currentTime = 0; soundCatch.play();
+      spawnParticles(flower.offsetLeft, flower.offsetTop, "✨");
+      flower.remove();
+    } else {
+      // penaliza si no había flor
+      errors++;
+      errorsEl.textContent = "❌ " + errors + "/" + maxErrors;
+      soundError.currentTime = 0; soundError.play();
+      if (errors >= maxErrors) endGame("❌ Demasiados errores.<br>Intenta de nuevo.");
+    }
+  });
+
+  function spawnParticles(x, y, symbol){
+    for(let i=0;i<5;i++){
+      const p=document.createElement("div");
+      p.className="particle";
+      p.textContent=symbol;
+      p.style.left=x+Math.random()*30+"px";
+      p.style.top=y+"px";
+      gameBox.appendChild(p);
+      setTimeout(()=>p.remove(),1000);
+    }
+  }
+
+  function startGame() {
+    score = 0; errors = 0; gameOver = false; timeLeft = 60;
+    scoreEl.textContent = "🌼 0";
+    errorsEl.textContent = "❌ 0/" + maxErrors;
+    messageBox.style.display = "none";
+    document.querySelectorAll(".item").forEach(i=>i.remove());
+    clearInterval(gameInterval);
+    clearInterval(timerInterval);
+    gameInterval = setInterval(createItem, 1000);
+    timerInterval = setInterval(updateTimer, 1000);
+    timerFill.style.width = "100%";
+  }
+
+  function updateTimer(){
+    timeLeft--;
+    timerFill.style.width = (timeLeft/60*100)+"%";
+    if(timeLeft<=0) endGame("⏳ Tiempo agotado.<br>Tu puntaje: "+score);
+  }
+
+  function endGame(msg){
+    gameOver = true;
+    clearInterval(gameInterval);
+    clearInterval(timerInterval);
+    finalMessage.innerHTML = msg + "<br>🌼 Puntaje: " + score;
+    messageBox.style.display = "block";
+    if(score>highScore){
+      highScore=score;
+      localStorage.setItem("highScore", highScore);
+      highScoreEl.textContent="🏆 "+highScore;
+    }
+  }
+
+  function restartGame(){ startGame(); }
+
+  function toggleMusic(){
+    if(bgMusic.paused){ bgMusic.play(); }
+    else { bgMusic.pause(); }
+  }
+
+  startGame();
+</script>
