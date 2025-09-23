@@ -3,7 +3,7 @@
 Un mini-juego retro en HTML donde tu misión es **atrapar flores** y **evitar obstáculos**.  
 Hecho con estilo *pixel arcade* y música de fondo 🎶.  
 
-👉 **Juega ahora:** [Enlace a GitHub Pages](https://github.com/vale34villa1/Flower-game-/tree/main)  
+👉 **Juega ahora:** [Enlace a GitHub Pages](https://vale34villa1.github.io/Flower-game-/)  
 
 ---
 
