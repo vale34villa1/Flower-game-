@@ -1,9 +1,9 @@
-# 🌼 Juego de las Flores
+# 🌼 Flower game
 
-Un mini-juego retro en HTML, CSS y JavaScript donde tu misión es **atrapar flores** y **evitar obstáculos**.  
+Un mini-juego retro en HTML donde tu misión es **atrapar flores** y **evitar obstáculos**.  
 Hecho con estilo *pixel arcade* y música de fondo 🎶.  
 
-👉 **Juega ahora:** [Enlace a GitHub Pages](https://vale34villa1.github.io/juego-flores/)  
+👉 **Juega ahora:** [Enlace a GitHub Pages](https://github.com/vale34villa1/Flower-game-/tree/main)  
 
 ---
 
@@ -34,7 +34,7 @@ Si quieres ejecutarlo en tu máquina:
 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/TU_USUARIO/juego-flores.git
+git clone https://github.com/vale34villa1/juego-flores.git
 
 # Entrar a la carpeta
 cd juego-flores
