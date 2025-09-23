@@ -11,7 +11,7 @@ Hecho con estilo *pixel arcade* y música de fondo 🎶.
 
 1. Haz clic o toca sobre las **🌼 flores** para sumar puntos.  
 2. Evita hacer clic en **🪨 rocas** o **🍂 hojas** (¡restan intentos!).  
-3. Tienes **60 segundos** ⏳ para atrapar la mayor cantidad posible.  
+3. Tienes **15 segundos** ⏳ para atrapar la mayor cantidad posible.  
 4. El juego termina si:
    - Se acaba el tiempo.  
    - Cometes **3 errores**.  
